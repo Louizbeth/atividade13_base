@@ -2,14 +2,17 @@ package ifpr.pgua.eic.listatelefonica.models.daos;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import ifpr.pgua.eic.listatelefonica.models.Contato;
 import ifpr.pgua.eic.listatelefonica.models.FabricaConexoes;
 import ifpr.pgua.eic.listatelefonica.models.results.Result;
 
-public class JDBCContatoDAO implements ContatoDAO{
+public class JDBCContatoDAO implements ContatoDAO {
 
     private FabricaConexoes fabricaConexao = FabricaConexoes.getInstance();
 
@@ -20,7 +23,7 @@ public class JDBCContatoDAO implements ContatoDAO{
     @Override
     public Result inserir(Contato contato) {
         // TODO Auto-generated method stub
-        try{
+        try {
             Connection con = fabricaConexao.getConnection();
 
             PreparedStatement pstm = con.prepareStatement("INSERT INTO contatos(nome,email,telefone)VALUES(?,?,?)");
@@ -35,7 +38,7 @@ public class JDBCContatoDAO implements ContatoDAO{
             con.close();
 
             return Result.success("Contato cadastrado!");
-        } catch (SQLException e){
+        } catch (SQLException e) {
             return Result.fail(e.getMessage());
         }
     }
@@ -43,7 +46,37 @@ public class JDBCContatoDAO implements ContatoDAO{
     @Override
     public List<Contato> buscarTodos() {
         // TODO Auto-generated method stub
-        return null;
+        try {
+            Connection con = fabricaConexao.getConnection();
+
+            PreparedStatement pstm = con.prepareStatement("SELECT * FROM contatos");
+
+            ResultSet resultSet = pstm.executeQuery();
+
+            ArrayList<Contato> contatos = new ArrayList<>();
+
+            while (resultSet.next()) {
+                Integer id = resultSet.getInt("id");
+                String nome = resultSet.getString("nome");
+                String email = resultSet.getString("email");
+                String telefone = resultSet.getString("telefone");
+
+                Contato contato = new Contato(id, nome, email, telefone);
+
+                contatos.add(contato);
+            }
+
+            resultSet.close();
+            pstm.close();
+            con.close();
+            return contatos;
+
+        } catch (
+
+        SQLException e) {
+            System.out.println(e.getMessage());
+            return Collections.emptyList();
+        }
     }
-    
+
 }
